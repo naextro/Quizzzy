@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Quiz</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: #001f3f;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .app {
+            background: #fff;
+            width: 100%;
+            max-width: 600px;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .app h1 {
+            font-size: 28px;
+            color: #001f3f;
+            font-weight: 700;
+            border-bottom: 2px solid #333;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .quiz h2 {
+            font-size: 22px;
+            color: #001f3f;
+            font-weight: 500;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .btn {
+            background: #f0f0f0;
+            color: #333;
+            font-weight: 500;
+            width: 100%;
+            border: 1px solid #ccc;
+            padding: 15px;
+            margin: 10px 0;
+            text-align: left;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: block;
+        }
+
+        .btn:hover:not([disabled]) {
+            background: #e0e0e0;
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .btn.correct {
+            background: #9aeabc;
+            color: #1a5a2d;
+            border-color: #6bbd7c;
+        }
+
+        .btn.incorrect {
+            background: #ffadad;
+            color: #8f1f1f;
+            border-color: #d66a6a;
+        }
+
+        #next-btn {
+            background: #007bff;
+            color: #fff;
+            font-weight: 500;
+            width: 150px;
+            border: 0;
+            padding: 12px;
+            margin: 30px auto 0;
+            border-radius: 8px;
+            cursor: pointer;
+            display: none;
+            transition: background 0.3s ease;
+        }
+
+        #next-btn:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <h1>Simple Quiz</h1>
+        <div class="quiz">
+            <h2 id="question">Question goes here</h2>
+            <div id="answer-buttons">
+                <button class="btn">Answer 1</button>
+                <button class="btn">Answer 2</button>
+                <button class="btn">Answer 3</button>
+                <button class="btn">Answer 4</button>
+            </div>
+            <button id="next-btn">Next</button>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "What is the capital of France?",
+                answers: [
+                    { text: "Berlin", correct: false },
+                    { text: "Madrid", correct: false },
+                    { text: "Paris", correct: true },
+                    { text: "Rome", correct: false },
+                ]
+            },
+            {
+                question: "Which planet is known as the Red Planet?",
+                answers: [
+                    { text: "Earth", correct: false },
+                    { text: "Mars", correct: true },
+                    { text: "Jupiter", correct: false },
+                    { text: "Venus", correct: false },
+                ]
+            },
+            {
+                question: "What is the largest ocean on Earth?",
+                answers: [
+                    { text: "Atlantic Ocean", correct: false },
+                    { text: "Indian Ocean", correct: false },
+                    { text: "Arctic Ocean", correct: false },
+                    { text: "Pacific Ocean", correct: true },
+                ]
+            },
+            {
+                question: "What is the chemical symbol for water?",
+                answers: [
+                    { text: "O2", correct: false },
+                    { text: "CO2", correct: false },
+                    { text: "H2O", correct: true },
+                    { text: "NaCl", correct: false },
+                ]
+            },
+            {
+                question: "Who painted the Mona Lisa?",
+                answers: [
+                    { text: "Vincent van Gogh", correct: false },
+                    { text: "Pablo Picasso", correct: false },
+                    { text: "Leonardo da Vinci", correct: true },
+                    { text: "Claude Monet", correct: false },
+                ]
+            }
+        ];
+
+        const questionElement = document.getElementById("question");
+        const answerButtons = document.getElementById("answer-buttons");
+        const nextButton = document.getElementById("next-btn");
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+
+        function startQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            nextButton.innerHTML = "Next";
+            showQuestion();
+        }
+
+        function showQuestion() {
+            resetState();
+
+            let currentQuestion = questions[currentQuestionIndex];
+            let questionNo = currentQuestionIndex + 1;
+            questionElement.innerHTML = questionNo + ". " + currentQuestion.question;
+
+            currentQuestion.answers.forEach(answer => {
+                const button = document.createElement("button");
+                button.innerHTML = answer.text;
+                button.classList.add("btn");
+                answerButtons.appendChild(button);
+
+                if (answer.correct) {
+                    button.dataset.correct = answer.correct;
+                }
+                button.addEventListener("click", selectAnswer);
+            });
+        }
+
+        function resetState() {
+            nextButton.style.display = "none";
+            while (answerButtons.firstChild) {
+                answerButtons.removeChild(answerButtons.firstChild);
+            }
+        }
+
+        function selectAnswer(e) {
+            const selectedBtn = e.target;
+            const isCorrect = selectedBtn.dataset.correct === "true";
+
+            if (isCorrect) {
+                selectedBtn.classList.add("correct");
+                score++;
+            } else {
+                selectedBtn.classList.add("incorrect");
+            }
+
+            Array.from(answerButtons.children).forEach(button => {
+                if (button.dataset.correct === "true") {
+                    button.classList.add("correct");
+                }
+                button.disabled = true;
+            });
+            nextButton.style.display = "block";
+        }
+
+        function showScore() {
+            resetState();
+            questionElement.innerHTML = `You scored ${score} out of ${questions.length}!`;
+            nextButton.innerHTML = "Play Again";
+            nextButton.style.display = "block";
+        }
+
+        function handleNextButton() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) {
+                showQuestion();
+            } else {
+                showScore();
+            }
+        }
+
+        nextButton.addEventListener("click", () => {
+            if (currentQuestionIndex < questions.length) {
+                handleNextButton();
+            } else {
+                startQuiz();
+            }
+        });
+
+        startQuiz();
+    </script>
+</body>
+</html>
+
